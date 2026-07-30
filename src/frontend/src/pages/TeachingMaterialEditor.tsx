@@ -778,7 +778,14 @@ export default function TeachingMaterialEditor() {
 
   const inferLevelFromTitle = (title: string): number | null => {
     const normalized = (title || "").trim();
-    const matched = normalized.match(/^(\d+(?:\.\d+)*)/);
+    if (!normalized) return null;
+
+    if (/^(Chương|Chuong)\s+\d+\b/i.test(normalized) && !/^(Chương|Chuong)\s+\d+\.\d+/i.test(normalized)) {
+      return 1;
+    }
+
+    const cleanNumbering = normalized.replace(/^(Chương|Chuong|Bài|Mục|Phần)\s+/i, "");
+    const matched = cleanNumbering.match(/^(\d+(?:\.\d+)*)/);
     if (!matched) return null;
     return Math.max(1, matched[1].split(".").length);
   };
@@ -1179,14 +1186,7 @@ export default function TeachingMaterialEditor() {
     setSections((prev) =>
       prev.map((item) => {
         if (item.id === sectionId) {
-          const nextItem = { ...item, ...updates };
-          if (updates.title !== undefined) {
-            const inferred = inferLevelFromTitle(updates.title);
-            if (inferred !== null) {
-              nextItem.level = Math.max(1, inferred);
-            }
-          }
-          return nextItem;
+          return { ...item, ...updates };
         }
         return item;
       }),

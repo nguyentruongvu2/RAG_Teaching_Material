@@ -77,13 +77,14 @@ function removeDuplicateHeading(content: string, sectionTitle: string): string {
 
 function inferLevelFromTitle(title: string): number {
   const normalized = (title || "").trim();
-  if (
-    normalized.toLowerCase().startsWith("chương") ||
-    normalized.toLowerCase().startsWith("chuong")
-  ) {
+  if (!normalized) return 1;
+
+  if (/^(Chương|Chuong)\s+\d+\b/i.test(normalized) && !/^(Chương|Chuong)\s+\d+\.\d+/i.test(normalized)) {
     return 1;
   }
-  const matched = normalized.match(/^(\d+(?:\.\d+)*)/);
+
+  const cleanNumbering = normalized.replace(/^(Chương|Chuong|Bài|Mục|Phần)\s+/i, "");
+  const matched = cleanNumbering.match(/^(\d+(?:\.\d+)*)/);
   if (!matched) return 1;
   return Math.max(1, matched[1].split(".").length);
 }
